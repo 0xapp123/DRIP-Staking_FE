@@ -22,7 +22,7 @@ const StakeModal: React.FC<ModalProps> = ({ isOpen, isStake, onClose, children }
               {isStake ? `Stake:` : `Unstake:`}
             </div>
             <div className='font-bold'>
-              {isStake ? `DRIP-BNB LP`: ``}
+              DRIP-BNB LP
             </div>
           </div>
         </div>
@@ -38,7 +38,7 @@ const StakeModal: React.FC<ModalProps> = ({ isOpen, isStake, onClose, children }
               className=" mt-4 p-2 w-2/3 bg-blue-500 font-bold text-white rounded-[8px]"
               onClick={onClose}
             >
-              Confirm
+              {isStake ? `Stake` : `Unstake`}
             </button>
           </div>
           <div className='flex justify-center mb-4'>
