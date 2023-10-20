@@ -52,7 +52,7 @@ function App() {
 
       <StakeModal isOpen={isStakeModalOpen} isStake={isStake} onClose={closeStakeModal}>
         <div className="flex justify-between bg-gray-200 rounded-t-[32px] p-6">
-          <div className="flex font-bold text-[20px]">{isStake ? `Stake` : `Unstake`}</div>
+          <div className="flex font-bold text-[20px]">{isStake ? `Stake in Pool` : `Unstake`}</div>
           <div className="flex">
             <button  onClick={closeStakeModal}>X</button>
           </div>
