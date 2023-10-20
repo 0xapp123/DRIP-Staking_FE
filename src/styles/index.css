@@ -2,6 +2,7 @@
 
 :root {
     font-family: 'Inter', sans-serif;
+    background-color: rgb(250, 242, 231);
 }
 
 @supports (font-variation-settings: normal) {
