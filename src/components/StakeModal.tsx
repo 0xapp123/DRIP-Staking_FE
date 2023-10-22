@@ -3,7 +3,7 @@ import React, { ChangeEvent, ReactNode, useState } from 'react';
 import { useErc20 } from '../hook/useErc20';
 import { useStaking } from '../hook/useStaking';
 import { parseEther } from 'viem';
-import { LP_TOKEN_ADDRESS, STAKING_CONTRACT_ABI, STAKING_CONTRACT_ADDRESS } from '../config/config';
+import { LP_TOKEN_ADDRESS, STAKING_CONTRACT_ADDRESS } from '../config/config';
 import LoadingModal from './LoadingSpinner';
 import { toast } from 'react-toastify';
 
