@@ -166,10 +166,12 @@ function App() {
             <div className="px-6 py-4 bg-white">
               <div className="flex items-start flex-wrap">
                 <div className="flex items-center gap-2 w-1/3">
-                  <div className="w-12 h-12 rounded-full border border-gray-700"></div>
+                  <div className="w-12 h-12 rounded-full border-2 border-blue-300">
+                    <img src="public/drip-network.png"></img>
+                  </div>
                   <div className="">
                     <h5 className="font-bold text-xl">Earn DRIP</h5>
-                    <p className="text-sm font-medium">Stake DRIP-BNB</p>
+                    <p className="text-sm font-medium">Stake <span className="text-pink-400 font-bold">DRIP-BNB LP</span></p>
                   </div>
                 </div>
                 <div className="w-1/3">
