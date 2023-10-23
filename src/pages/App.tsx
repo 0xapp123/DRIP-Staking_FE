@@ -167,7 +167,7 @@ function App() {
               <div className="flex items-start flex-wrap">
                 <div className="flex items-center gap-2 w-1/3">
                   <div className="w-12 h-12 rounded-full border-2 border-blue-300">
-                    <img src="public/drip-network.png"></img>
+                    <img src="/drip-network.png"></img>
                   </div>
                   <div className="">
                     <h5 className="font-bold text-xl">Earn DRIP</h5>
