@@ -52,7 +52,7 @@ const StakeModal: React.FC<ModalProps> = ({ isOpen, isStake, userStakeAmt, userL
           )
         }
       } else {
-        res = await withdraw(BigInt(value));
+        res = await withdraw(parseEther(value));
       }
       
       if (res) {
