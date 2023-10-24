@@ -4,13 +4,13 @@ import { STAKING_CONTRACT_ABI, STAKING_CONTRACT_ADDRESS } from "../config/config
 export function useStaking() {
   const deposit = async (
     amount: bigint,
-    boostMultiplier: bigint
+    duration: bigint
   ) => {
     return write({
       address: STAKING_CONTRACT_ADDRESS,
       abi: STAKING_CONTRACT_ABI,
       functionName: 'deposit',
-      args:[amount, boostMultiplier]
+      args:[amount, duration]
     })
   }
 

@@ -1,6 +1,7 @@
-export const STAKING_CONTRACT_ADDRESS : `0x${string}` =
-  "0xd89B8Cc60DA769F79170c4703f2b4197B53Da497";
-export const LP_TOKEN_ADDRESS = "0x16567F9Cc0cb4858bcC729285fC836006eE9c81b";
+export const STAKING_CONTRACT_ADDRESS: `0x${string}` =
+  "0xffCE5aa45dC2CFF8dA17BCfa27e64dfA087D85Bf";
+export const LP_TOKEN_ADDRESS: `0x${string}` =
+  "0x16567F9Cc0cb4858bcC729285fC836006eE9c81b";
 export const STAKING_CONTRACT_ABI: any[] = [
   { inputs: [], stateMutability: "nonpayable", type: "constructor" },
   {
@@ -109,6 +110,20 @@ export const STAKING_CONTRACT_ABI: any[] = [
   },
   {
     inputs: [],
+    name: "MAX_LOCK_DURATION",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "MIN_LOCK_DURATION",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "TREASURY",
     outputs: [
       { internalType: "contract ITreasury", name: "", type: "address" },
@@ -126,7 +141,7 @@ export const STAKING_CONTRACT_ABI: any[] = [
   {
     inputs: [
       { internalType: "uint256", name: "_amount", type: "uint256" },
-      { internalType: "uint256", name: "multiplier", type: "uint256" },
+      { internalType: "uint256", name: "_lockDuration", type: "uint256" },
     ],
     name: "deposit",
     outputs: [],
@@ -136,6 +151,17 @@ export const STAKING_CONTRACT_ABI: any[] = [
   {
     inputs: [],
     name: "dripPerBlock",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "address", name: "_user", type: "address" },
+      { internalType: "uint256", name: "_duration", type: "uint256" },
+      { internalType: "uint256", name: "_amount", type: "uint256" },
+    ],
+    name: "getBoostMultiplier",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
@@ -165,6 +191,13 @@ export const STAKING_CONTRACT_ABI: any[] = [
     inputs: [],
     name: "lpToken",
     outputs: [{ internalType: "contract IBEP20", name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "maxLockDuration",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
@@ -240,6 +273,9 @@ export const STAKING_CONTRACT_ABI: any[] = [
       { internalType: "uint256", name: "amount", type: "uint256" },
       { internalType: "uint256", name: "rewardDebt", type: "uint256" },
       { internalType: "uint256", name: "boostMultiplier", type: "uint256" },
+      { internalType: "uint256", name: "earnedDrip", type: "uint256" },
+      { internalType: "uint256", name: "lockStartTime", type: "uint256" },
+      { internalType: "uint256", name: "lockEndTime", type: "uint256" },
     ],
     stateMutability: "view",
     type: "function",
