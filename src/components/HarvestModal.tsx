@@ -6,11 +6,17 @@ import { toast } from "react-toastify";
 
 interface ModalProps {
   isOpen: boolean;
+  duration: number;
   onClose: () => void;
   children: ReactNode;
 }
 
-const HarvestModal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
+const HarvestModal: React.FC<ModalProps> = ({
+  isOpen,
+  duration,
+  onClose,
+  children,
+}) => {
   if (!isOpen) return null;
   const [loading, setLoading] = useState(false);
   const { deposit } = useStaking();
@@ -18,14 +24,13 @@ const HarvestModal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
   const handleClaim = async () => {
     setLoading(true);
     try {
-      const res = await deposit(BigInt(0), BigInt(1000000000000));
+      const res = await deposit(BigInt(0), BigInt(0));
 
       if (res) {
-        console.log(res)
+        console.log(res);
         setLoading(false);
         onClose();
         if (res.status === "success") {
-          
           toast.success("Success!", {
             autoClose: 3000, // Close the toast after 3 seconds
           });
@@ -50,13 +55,17 @@ const HarvestModal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
       <div className="bg-white rounded-[32px] shadow-xl z-50 w-[350px]">
         {children}
         <div>
+          <div className="flex justify-between mx-8">
+            <div>End in:</div>
+            <div>{duration > 0 ? `${duration} days` : `Claim Available`}</div>
+          </div>
           <div className="flex justify-center">
-            <button
-              className=" mt-4 p-2 w-2/3 bg-blue-500 font-bold text-white rounded-[8px]"
-              onClick={handleClaim}
-            >
-              Confirm
-            </button>
+              <button
+                className=" mt-4 p-2 w-2/3 bg-blue-500 font-bold text-white rounded-[8px]"
+                onClick={handleClaim}
+              >
+                Confirm
+              </button>
             {loading && <LoadingSpinner />}
             {/* {isConfirmed && (isSuccess ? <Toast isSuccess={true}/> : <Toast isSuccess={false}/>)} */}
           </div>

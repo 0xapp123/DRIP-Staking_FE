@@ -26,6 +26,7 @@ function App() {
   const [stakedAmount, setStakedAmount] = useState(0);
   const [pendingDrip, setPendingDrip] = useState(0);
   const [price, setPrice] = useState(0);
+  const [endTime, setEndTime] = useState(0);
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -85,6 +86,11 @@ function App() {
         setUserStakeAmount(Number(formatEther(infoUser[0])));
         // @ts-ignore
         setUserRewardDebt(Number(formatEther(infoUser[1])));
+        const now = Math.floor(Date.now()/1000);
+        // @ts-ignore
+        const until = Number(infoUser[5]) - now;
+        if (until > 0) setEndTime(Math.ceil(until/86400));
+        else setEndTime(0);
       }
       if (infoTotal) {
         // @ts-ignore
@@ -120,6 +126,7 @@ function App() {
       <Header />
       <HarvestModal
         isOpen={isModalOpen}
+        duration={endTime}
         onClose={closeModal}
       >
         <div className="flex justify-between bg-gray-200 rounded-t-[32px] p-6">
@@ -143,6 +150,7 @@ function App() {
         onClose={closeStakeModal}
         userStakeAmt={userStakeAmount}
         userLpBal={userLpBalance}
+        endTime={endTime}
       >
         <div className="flex justify-between bg-gray-200 rounded-t-[32px] p-6">
           <div className="flex font-bold text-[20px]">
@@ -200,6 +208,10 @@ function App() {
             </div>
             <div className="px-6 py-4 bg-gray-200 border-t-2 border-gray-50 flex">
               <div className="w-[200px]">
+                <div className="flex justify-between">
+                  <span>End in:</span>
+                  <span>{endTime} days</span>
+                </div>
                 <a
                   href="https://bscscan.com/token/0x20f663CEa80FaCE82ACDFA3aAE6862d246cE0333"
                   className="font-medium hover:underline"
