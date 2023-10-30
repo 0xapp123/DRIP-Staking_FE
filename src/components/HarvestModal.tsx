@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 interface ModalProps {
   isOpen: boolean;
   duration: number;
+  id: number;
   onClose: () => void;
   children: ReactNode;
 }
@@ -14,17 +15,18 @@ interface ModalProps {
 const HarvestModal: React.FC<ModalProps> = ({
   isOpen,
   duration,
+  id,
   onClose,
   children,
 }) => {
   if (!isOpen) return null;
   const [loading, setLoading] = useState(false);
-  const { stake } = useStaking();
+  const { claim } = useStaking();
 
   const handleClaim = async () => {
     setLoading(true);
     try {
-      const res = await stake(BigInt(0), BigInt(0));
+      const res = await claim(BigInt(id));
 
       if (res) {
         console.log(res);
