@@ -28,7 +28,7 @@ const StakeInfo: React.FC<ModalProps> = ({
     setIsModalOpen(false);
   };
 
-  const openStakeModal = (stake: boolean) => {
+  const openStakeModal = () => {
     setIsStakeModalOpen(true);
   };
 
@@ -75,7 +75,7 @@ const StakeInfo: React.FC<ModalProps> = ({
             <div>
               <button
                 onClick={() => {
-                  openStakeModal(false);
+                  openStakeModal();
                 }}
                 className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 text-[18px] font-bold rounded-md uppercase shadow-lg"
               >

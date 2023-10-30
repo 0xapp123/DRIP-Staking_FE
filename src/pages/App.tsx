@@ -9,7 +9,6 @@ import { formatEther } from "viem";
 import { useStaking } from "../hook/useStaking";
 import { useErc20 } from "../hook/useErc20";
 import StakeInfo from "../components/StakeInfo";
-import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 
 function App() {
   const { isConnected, address } = useAccount();
