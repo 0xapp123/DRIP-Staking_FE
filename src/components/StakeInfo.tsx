@@ -1,11 +1,5 @@
 // Modal.tsx
-import React, { ChangeEvent, ReactNode, useState } from "react";
-import { useErc20 } from "../hook/useErc20";
-import { useStaking } from "../hook/useStaking";
-import { parseEther } from "viem";
-import { LP_TOKEN_ADDRESS, STAKING_CONTRACT_ADDRESS } from "../config/config";
-import LoadingModal from "./LoadingSpinner";
-import { toast } from "react-toastify";
+import React, { useState } from "react";
 import { useAccount } from "wagmi";
 import StakeModal from "./StakeModal";
 import HarvestModal from "./HarvestModal";
@@ -22,7 +16,7 @@ const StakeInfo: React.FC<ModalProps> = ({
   userStakeAmount,
   endTime,
 }) => {
-  const { isConnected, address } = useAccount();
+  const { isConnected } = useAccount();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isStakeModalOpen, setIsStakeModalOpen] = useState(false);
 
