@@ -4,6 +4,7 @@ import { useAccount } from "wagmi";
 import StakeModal from "./StakeModal";
 import HarvestModal from "./HarvestModal";
 interface ModalProps {
+  stakeId: number;
   pendingDrip: number;
   price: number;
   userStakeAmount: number;
@@ -11,6 +12,7 @@ interface ModalProps {
 }
 
 const StakeInfo: React.FC<ModalProps> = ({
+  stakeId,
   pendingDrip,
   price,
   userStakeAmount,
@@ -109,6 +111,7 @@ const StakeInfo: React.FC<ModalProps> = ({
       <HarvestModal
         isOpen={isModalOpen}
         duration={endTime}
+        id={stakeId}
         onClose={closeModal}
       >
         <div className="flex justify-between bg-gray-200 rounded-t-[32px] p-6">

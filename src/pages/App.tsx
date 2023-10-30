@@ -132,26 +132,6 @@ function App() {
   return (
     <>
       <Header />
-      {/* <HarvestModal
-        isOpen={isModalOpen}
-        duration={endTime}
-        onClose={closeModal}
-      >
-        <div className="flex justify-between bg-gray-200 rounded-t-[32px] p-6">
-          <div className="flex font-bold text-[20px]">DRIP Harvest</div>
-          <div className="flex">
-            <button onClick={closeModal}>X</button>
-          </div>
-        </div>
-        <div className="p-8">
-          <div className="text-lg font-bold">Harvesting:</div>
-          <div className="text-[20px] mt-4 font-bold">{pendingDrip} DRIP</div>
-          <div className="text-gray-400 font-bold">
-            ~{(pendingDrip * price).toFixed(4)} USD
-          </div>
-        </div>
-      </HarvestModal> */}
-
       <StakeModal
         isOpen={isStakeModalOpen}
         isStake={isStake}
@@ -265,6 +245,7 @@ function App() {
                       pendingDrip={pendingDrip[item]}
                       price={price}
                       userStakeAmount={userStakeAmount[item]}
+                      stakeId={item}
                       endTime={endTime[item]} />
                   ))}
                 </div>
