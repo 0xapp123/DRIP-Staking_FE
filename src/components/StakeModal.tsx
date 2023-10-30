@@ -28,15 +28,14 @@ const StakeModal: React.FC<ModalProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState("");
   const { approve } = useErc20();
-  const { withdraw, deposit } = useStaking();
+  const { withdraw, stake } = useStaking();
   const [loading, setLoading] = useState(false);
   const [duration, setDuration] = useState(1);
 
   const handleDuration = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value as unknown as number;
-    const max = MAX_WEEKS - Math.ceil(endTime/7);
     
-    if (max < value) setDuration(max);
+    if (MAX_WEEKS < value) setDuration(MAX_WEEKS);
     else setDuration(value);
   };
 
@@ -68,7 +67,7 @@ const StakeModal: React.FC<ModalProps> = ({
           parseEther(value)
         );
         if (res1.status === "success") {
-          res = await deposit(
+          res = await stake(
             BigInt(parseEther(value)),
             BigInt(duration * 7 * 86400)
           );
@@ -110,10 +109,12 @@ const StakeModal: React.FC<ModalProps> = ({
             </div>
             <div className="font-bold">DRIP-BNB LP</div>
           </div>
-          <div className="flex justify-between py-2 font-semibold">
-            <span>End in: </span>
-            <span>{endTime} days</span>
-          </div>
+          {!isStake &&
+            (<div className="flex justify-between py-2 font-semibold">
+              <span>End in: </span>
+              <span>{endTime} days</span>
+            </div>)
+          }
         </div>
         <div className=" border-solid border-4 border-gray-400 bg-gray-200 rounded-[12px] m-6 p-4">
           <input

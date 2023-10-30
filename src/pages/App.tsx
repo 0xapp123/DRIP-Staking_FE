@@ -1,40 +1,31 @@
 import Header from "../components/Header";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import { useEffect, useState } from "react";
-import HarvestModal from "../components/HarvestModal";
 import StakeModal from "../components/StakeModal";
 
 import { useAccount } from "wagmi";
-import {
-  STAKING_CONTRACT_ADDRESS,
-} from "../config/config";
+import { STAKING_CONTRACT_ADDRESS } from "../config/config";
 import { formatEther } from "viem";
 import { useStaking } from "../hook/useStaking";
 import { useErc20 } from "../hook/useErc20";
+import StakeInfo from "../components/StakeInfo";
 
 function App() {
   const { isConnected, address } = useAccount();
-  const { userInfo, pending } = useStaking();
+  const { userInfo, pending, currentStakedId, earnedDrip } = useStaking();
   const { balanceOf } = useErc20();
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isStake, setIsStake] = useState(false);
   const [isStakeModalOpen, setIsStakeModalOpen] = useState(false);
 
-  const [userRewardDebt, setUserRewardDebt] = useState(0);
-  const [userStakeAmount, setUserStakeAmount] = useState(0);
   const [userLpBalance, setUserLpBalance] = useState(0);
   const [stakedAmount, setStakedAmount] = useState(0);
-  const [pendingDrip, setPendingDrip] = useState(0);
   const [price, setPrice] = useState(0);
-  const [endTime, setEndTime] = useState(0);
+  const [earnedAmt, setEarnedAmt] = useState(0);
 
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
+  const [userStakeAmount, setUserStakeAmount] = useState<number[]>([]);
+  const [pendingDrip, setPendingDrip] = useState<number[]>([]);
+  const [endTime, setEndTime] = useState<number[]>([]);
+  const [times, setTimes] = useState<number[]>([]);
 
   const openStakeModal = (stake: boolean) => {
     setIsStake(stake);
@@ -65,45 +56,61 @@ function App() {
           console.log(e);
         });
       getUserInfo();
-    }, 5000);
+    }, 7000);
     return interval;
   };
 
   const getUserInfo = async () => {
-    console.log("get user info");
-    if (address)
-      console.log("=============================", await userInfo(address));
-    if (address)
-      console.log("=============================", await balanceOf(address));
-    if (address) {
-      const infoUser = await userInfo(address);
-      const infoTotal = await balanceOf(STAKING_CONTRACT_ADDRESS);
-      const infoPending = await pending(address);
-      const infoBal = await balanceOf(address);
+    console.log("Get userinfo ...");
 
-      if (infoUser) {
-        // @ts-ignore
-        setUserStakeAmount(Number(formatEther(infoUser[0])));
-        // @ts-ignore
-        setUserRewardDebt(Number(formatEther(infoUser[1])));
-        const now = Math.floor(Date.now()/1000);
-        // @ts-ignore
-        const until = Number(infoUser[5]) - now;
-        if (until > 0) setEndTime(Math.ceil(until/86400));
-        else setEndTime(0);
+    if (address) {
+      const pendingDrips: number[] = [];
+      const userStakeAmounts: number[] = [];
+      const endTimes: number[] = [];
+      const stakedItems: number[] = [];
+
+      const staked = await currentStakedId(address);
+      const infoBal = await balanceOf(address);
+      const infoTotal = await balanceOf(STAKING_CONTRACT_ADDRESS);
+      const earnedInfo = await earnedDrip(address);
+
+      for (let i = 0; i < Number(staked); i++) {
+        stakedItems.push(i);
+        const userInfos = await userInfo(address, BigInt(i));
+        const pendingInfos = await pending(address, BigInt(i));
+
+        if (userInfos) {
+          // @ts-ignore
+          userStakeAmounts.push(Number(formatEther(userInfos[0])));
+
+          const now = Math.floor(Date.now() / 1000);
+          // @ts-ignore
+          const until = Number(userInfos[4]) - now;
+          if (until > 0) endTimes.push(Math.ceil(until / 86400));
+          else endTimes.push(0);
+        }
+        if (pendingInfos) {
+          // @ts-ignore
+          pendingDrips.push(Number(formatEther(pendingInfos)))
+        }
       }
       if (infoTotal) {
         // @ts-ignore
         setStakedAmount(Number(formatEther(infoTotal)));
       }
-      if (infoPending) {
-        // @ts-ignore
-        setPendingDrip(Number(formatEther(infoPending)));
-      }
       if (infoBal) {
         // @ts-ignore
         setUserLpBalance(Number(formatEther(infoBal)));
       }
+      if (earnedInfo) {
+        // @ts-ignore
+        setEarnedAmt(Number(formatEther(earnedInfo)));
+      }
+
+      setPendingDrip(pendingDrips);
+      setUserStakeAmount(userStakeAmounts);
+      setEndTime(endTimes)
+      setTimes(stakedItems);
     }
   };
 
@@ -112,6 +119,7 @@ function App() {
     if (isConnected && address) {
       getUserInfo();
     }
+   
   }, [isConnected, address]);
 
   useEffect(() => {
@@ -124,7 +132,7 @@ function App() {
   return (
     <>
       <Header />
-      <HarvestModal
+      {/* <HarvestModal
         isOpen={isModalOpen}
         duration={endTime}
         onClose={closeModal}
@@ -142,15 +150,15 @@ function App() {
             ~{(pendingDrip * price).toFixed(4)} USD
           </div>
         </div>
-      </HarvestModal>
+      </HarvestModal> */}
 
       <StakeModal
         isOpen={isStakeModalOpen}
         isStake={isStake}
         onClose={closeStakeModal}
-        userStakeAmt={userStakeAmount}
+        userStakeAmt={userStakeAmount[0]}
         userLpBal={userLpBalance}
-        endTime={endTime}
+        endTime={endTime[0]}
       >
         <div className="flex justify-between bg-gray-200 rounded-t-[32px] p-6">
           <div className="flex font-bold text-[20px]">
@@ -162,56 +170,65 @@ function App() {
         </div>
       </StakeModal>
 
-      <main>
-        <div className="max-w-[1200px] mx-auto mt-10">
-          <h1 className="leading-[1.5] text-[48px] font-bold my-6">
+      <main className="fixed w-full h-screen">
+        <div className="block max-w-[1200px] h-screen mx-auto mt-10">
+          <h1 className="text-[48px] font-bold my-6">
             DRIP-BNB LP Staking Pools
           </h1>
-          <h1 className="text-2xl font-bold my-6">
+          <h1 className="text-[24px] font-bold my-6">
             Just stake DRIP-BNB LP tokens to earn. <br />
           </h1>
           <div className="border rounded-2xl border-[#00000030] overflow-hidden">
-            <div className="px-6 py-4 bg-white">
+            <div className="px-6 py-4 h- bg-white">
               <div className="flex items-start flex-wrap">
-                <div className="flex items-center gap-2 w-1/3">
+                <div className="flex items-center gap-2 w-1/4">
                   <div className="w-12 h-12 rounded-full border-2 border-blue-300">
                     <img src="/drip-network.png"></img>
                   </div>
                   <div className="">
                     <h5 className="font-bold text-xl">Earn DRIP</h5>
-                    <p className="text-sm font-medium">Stake <span className="text-pink-400 font-bold">DRIP-BNB LP</span></p>
+                    <p className="text-sm font-medium">
+                      Stake{" "}
+                      <span className="text-pink-400 font-bold">
+                        DRIP-BNB LP
+                      </span>
+                    </p>
                   </div>
                 </div>
-                <div className="w-1/3">
+                <div className="w-1/6">
                   <p className="text-sm leading-4 font-medium">DRIP Earned</p>
                   <p className="text-xl leading-6 opacity-80 font-bold">
-                    {isConnected
-                      ? `${userRewardDebt.toFixed(4)}`
-                      : `--`}
+                    {isConnected ? `${earnedAmt.toFixed(4)}` : `--`}
                   </p>
                   <p className="text-sm leading-4">
                     {" "}
                     {isConnected
-                      ? `~${(price * userRewardDebt).toFixed(3)}`
+                      ? `~${(price * earnedAmt).toFixed(3)}`
                       : `--`}{" "}
                     USD
                   </p>
                 </div>
-                <div className="w-1/3">
+                <div className="w-1/4">
                   <p className="text-sm leading-4 font-medium">Total Staked</p>
                   <p className="text-xl leading-6 font-bold">
                     {isConnected ? `${stakedAmount.toFixed(4)}` : `--`} DRIP-BNB
                     LP
                   </p>
                 </div>
+                <div className="w-1/3">
+                  <button
+                    onClick={() => {
+                      openStakeModal(true);
+                    }}
+                    className="block m-auto mt-2 bg-green-600 hover:bg-green-700 text-white px-10 py-2 text-[18px] font-bold rounded-md uppercase shadow-lg"
+                  >
+                    Stake
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="px-6 py-4 bg-gray-200 border-t-2 border-gray-50 flex">
+            <div className="px-6 py-4 bg-gray-200 border-t-2 h-[calc(100vh-380px)] border-gray-50 flex">
               <div className="w-[200px]">
-                <div className="flex justify-between">
-                  <span>End in:</span>
-                  <span>{endTime} days</span>
-                </div>
                 <a
                   href="https://bscscan.com/token/0x20f663CEa80FaCE82ACDFA3aAE6862d246cE0333"
                   className="font-medium hover:underline"
@@ -239,72 +256,17 @@ function App() {
                     View Contract <FaExternalLinkAlt className="w-3 h-3" />
                   </div>
                 </a>
-                {/* <a
-                  href="#"
-                  className="font-medium hover:underline"
-                  target="_blank"
-                >
-                  <div className="flex items-center mt-2 gap-2 text-sm text-green-600">
-                    Add to wallet <MetamaskIcon />
-                  </div>
-                </a> */}
               </div>
-              <div className="w-[calc(100%-240px)] ml-10 flex flex-col justify-center">
-                <div className="flex items-center gap-5 justify-between">
-                  <div className="border rounded-2xl border-gray-400 p-6 w-[calc(50%-10px)] flex items-center justify-between">
-                    <div className="">
-                      <p className="font-bold">
-                        <span className="text-purple-600">DRIP</span> TO EARN
-                      </p>
-                      <p className="text-2xl font-bold">
-                        {isConnected ? `${pendingDrip.toFixed(4)}` : "--"}
-                      </p>
-                      <p className="text-sm font-bold opacity-60">
-                        {isConnected
-                          ? `~${(pendingDrip * price).toFixed(4)}`
-                          : "--"}
-                        USD
-                      </p>
-                    </div>
-                    <button
-                      onClick={openModal}
-                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 text-[18px] font-bold rounded-md uppercase shadow-lg"
-                    >
-                      Harvest
-                    </button>
-                  </div>
-                  <div className="border rounded-2xl border-gray-400 p-6 w-[calc(50%-10px)] flex items-center justify-between">
-                    <div className="">
-                      <p className="font-bold">
-                        <span className="text-purple-600">DRIP-BNB LP</span>{" "}
-                        STAKED
-                      </p>
-                      <p className="text-2xl font-bold">
-                        {isConnected ? `${userStakeAmount.toFixed(4)}` : `--`}
-                      </p>
-                      <p className="text-sm font-bold opacity-60">
-                        DRIP-BNB LP
-                      </p>
-                    </div>
-                    <div className="flex w-[calc(40%-10px)] justify-between">
-                      <button
-                        onClick={() => {
-                          openStakeModal(false);
-                        }}
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 text-[18px] font-bold rounded-md uppercase shadow-lg"
-                      >
-                        -
-                      </button>
-                      <button
-                        onClick={() => {
-                          openStakeModal(true);
-                        }}
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 text-[18px] font-bold rounded-md uppercase shadow-lg"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
+
+              <div className="w-[calc(100%-240px)] ml-10 flex flex-col">
+                <div className="max-h-screen w-full overflow-y-scroll">
+                  {times.map((item) => (
+                    <StakeInfo 
+                      pendingDrip={pendingDrip[item]}
+                      price={price}
+                      userStakeAmount={userStakeAmount[item]}
+                      endTime={endTime[item]} />
+                  ))}
                 </div>
               </div>
             </div>

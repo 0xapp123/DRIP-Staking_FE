@@ -1,5 +1,5 @@
 export const STAKING_CONTRACT_ADDRESS: `0x${string}` =
-  "0xffCE5aa45dC2CFF8dA17BCfa27e64dfA087D85Bf";
+  "0xcB09DbaE86aEF5508Dc730b77A222D19bc6E5a2A";
 export const LP_TOKEN_ADDRESS: `0x${string}` =
   "0x16567F9Cc0cb4858bcC729285fC836006eE9c81b";
 export const STAKING_CONTRACT_ABI: any[] = [
@@ -15,6 +15,15 @@ export const STAKING_CONTRACT_ABI: any[] = [
     type: "error",
   },
   { inputs: [], name: "ReentrancyGuardReentrantCall", type: "error" },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, internalType: "address", name: "user", type: "address" },
+      { indexed: false, internalType: "uint256", name: "id", type: "uint256" },
+    ],
+    name: "Claim",
+    type: "event",
+  },
   {
     anonymous: false,
     inputs: [
@@ -139,18 +148,29 @@ export const STAKING_CONTRACT_ABI: any[] = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "uint256", name: "_amount", type: "uint256" },
-      { internalType: "uint256", name: "_lockDuration", type: "uint256" },
-    ],
-    name: "deposit",
+    inputs: [{ internalType: "uint256", name: "_stakedId", type: "uint256" }],
+    name: "claim",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
   {
+    inputs: [{ internalType: "address", name: "", type: "address" }],
+    name: "currentStakedId",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "dripPerBlock",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "", type: "address" }],
+    name: "earnedDrip",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
@@ -209,7 +229,10 @@ export const STAKING_CONTRACT_ABI: any[] = [
     type: "function",
   },
   {
-    inputs: [{ internalType: "address", name: "_user", type: "address" }],
+    inputs: [
+      { internalType: "address", name: "_user", type: "address" },
+      { internalType: "uint256", name: "_stakeId", type: "uint256" },
+    ],
     name: "pendingDrip",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
@@ -220,6 +243,23 @@ export const STAKING_CONTRACT_ABI: any[] = [
     name: "renounceOwnership",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "uint256", name: "_amount", type: "uint256" },
+      { internalType: "uint256", name: "_lockDuration", type: "uint256" },
+    ],
+    name: "stake",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "", type: "address" }],
+    name: "stakedAmount",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -267,13 +307,15 @@ export const STAKING_CONTRACT_ABI: any[] = [
     type: "function",
   },
   {
-    inputs: [{ internalType: "address", name: "", type: "address" }],
+    inputs: [
+      { internalType: "address", name: "", type: "address" },
+      { internalType: "uint256", name: "", type: "uint256" },
+    ],
     name: "userInfo",
     outputs: [
       { internalType: "uint256", name: "amount", type: "uint256" },
       { internalType: "uint256", name: "rewardDebt", type: "uint256" },
       { internalType: "uint256", name: "boostMultiplier", type: "uint256" },
-      { internalType: "uint256", name: "earnedDrip", type: "uint256" },
       { internalType: "uint256", name: "lockStartTime", type: "uint256" },
       { internalType: "uint256", name: "lockEndTime", type: "uint256" },
     ],
@@ -281,14 +323,7 @@ export const STAKING_CONTRACT_ABI: any[] = [
     type: "function",
   },
   {
-    inputs: [{ internalType: "address", name: "", type: "address" }],
-    name: "userMultiplier",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "uint256", name: "_amount", type: "uint256" }],
+    inputs: [{ internalType: "uint256", name: "_stakedId", type: "uint256" }],
     name: "withdraw",
     outputs: [],
     stateMutability: "nonpayable",

@@ -19,12 +19,12 @@ const HarvestModal: React.FC<ModalProps> = ({
 }) => {
   if (!isOpen) return null;
   const [loading, setLoading] = useState(false);
-  const { deposit } = useStaking();
+  const { stake } = useStaking();
 
   const handleClaim = async () => {
     setLoading(true);
     try {
-      const res = await deposit(BigInt(0), BigInt(0));
+      const res = await stake(BigInt(0), BigInt(0));
 
       if (res) {
         console.log(res);
