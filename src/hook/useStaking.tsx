@@ -72,6 +72,24 @@ export function useStaking() {
       args: [accountAddress]
     })
   };
+  
+  const userStakedAmount = async (accountAddress: string) => {
+    return await read({
+      address: STAKING_CONTRACT_ADDRESS,
+      abi: STAKING_CONTRACT_ABI,
+      functionName: 'stakedAmount',
+      args: [accountAddress]
+    })
+  };
+
+  const maxLockDuration = async () => {
+    return await read({
+      address: STAKING_CONTRACT_ADDRESS,
+      abi: STAKING_CONTRACT_ABI,
+      functionName: 'maxLockDuration',
+    })
+  };
+
   return {
     stake,
     claim,
@@ -79,6 +97,8 @@ export function useStaking() {
     userInfo,
     pending,
     earnedDrip,
-    currentStakedId
+    currentStakedId,
+    userStakedAmount,
+    maxLockDuration
   };
 }

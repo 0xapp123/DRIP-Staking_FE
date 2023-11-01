@@ -1,8 +1,8 @@
 // Modal.tsx
 import React, { useState } from "react";
 import { useAccount } from "wagmi";
-import StakeModal from "./StakeModal";
 import HarvestModal from "./HarvestModal";
+import UnstakeModal from "./UnstakeModal";
 interface ModalProps {
   stakeId: number;
   pendingDrip: number;
@@ -91,12 +91,12 @@ const StakeInfo: React.FC<ModalProps> = ({
           </div>
         </div>
       </div>
-      <StakeModal
+      <UnstakeModal
         isOpen={isStakeModalOpen}
         isStake={false}
         onClose={closeStakeModal}
         userStakeAmt={userStakeAmount}
-        userLpBal={1}
+        id={stakeId}
         endTime={endTime}
       >
         <div className="flex justify-between bg-gray-200 rounded-t-[32px] p-6">
@@ -107,7 +107,7 @@ const StakeInfo: React.FC<ModalProps> = ({
             <button onClick={closeStakeModal}>X</button>
           </div>
         </div>
-      </StakeModal>
+      </UnstakeModal>
       <HarvestModal
         isOpen={isModalOpen}
         duration={endTime}

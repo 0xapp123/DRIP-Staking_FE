@@ -13,6 +13,10 @@ interface ModalProps {
   userStakeAmt: number;
   userLpBal: number;
   endTime: number;
+  lpSupply: number;
+  userTotalStake: number; 
+  maxDuration: number;  
+  stakedAmount: number;
   onClose: () => void;
   children: ReactNode;
 }
@@ -23,10 +27,15 @@ const StakeModal: React.FC<ModalProps> = ({
   userStakeAmt,
   userLpBal,
   endTime,
+  lpSupply,
+  userTotalStake,
+  maxDuration,
+  stakedAmount,
   onClose,
   children,
 }) => {
   const [inputValue, setInputValue] = useState("");
+  const [multiplier, setMultiplier] = useState(1);
   const { approve } = useErc20();
   const { withdraw, stake } = useStaking();
   const [loading, setLoading] = useState(false);
@@ -34,9 +43,19 @@ const StakeModal: React.FC<ModalProps> = ({
 
   const handleDuration = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value as unknown as number;
-    
-    if (MAX_WEEKS < value) setDuration(MAX_WEEKS);
-    else setDuration(value);
+    if (userTotalStake === 0 || maxDuration === 0 || lpSupply === 0  || stakedAmount === 0) setMultiplier(1);
+    if (MAX_WEEKS < value) {
+      console.log("inpiut", Number(inputValue));
+      console.log("userTotalStake", userTotalStake);
+
+      const boostMul = 1 + Number(inputValue) * MAX_WEEKS * 7 * 86400 * userTotalStake /(lpSupply * maxDuration * stakedAmount);
+      setMultiplier(boostMul);
+      setDuration(MAX_WEEKS);
+    } else {
+      const boostMul = 1 + Number(inputValue) * value * 7 * 86400 * userTotalStake /(lpSupply * maxDuration * stakedAmount);
+      setMultiplier(boostMul);
+      setDuration(value);
+    }
   };
 
   if (!isOpen) return null;
@@ -50,8 +69,21 @@ const StakeModal: React.FC<ModalProps> = ({
 
       if (Number(event.target.value) > max) console.log("Exceed Amount");
       else if (isNaN(Number(event.target.value))) setInputValue("0");
-      else setInputValue(event.target.value);
+      else {
+        if (userTotalStake === 0 || maxDuration === 0 || lpSupply === 0  || stakedAmount === 0) setMultiplier(1);
+        else {
+          const boostMul = 1 + Number(event.target.value) * 7 * duration * 86400 * userTotalStake /(lpSupply * maxDuration * stakedAmount);
+          setMultiplier(boostMul);
+        }
+        setInputValue(event.target.value);
+      }
     };
+
+  const handleSetDuration = (value: number) => {
+    const boostMul = 1 + Number(inputValue) * value * 7 * 86400 * userTotalStake /(lpSupply * maxDuration * stakedAmount);
+    setMultiplier(boostMul);
+    setDuration(value);
+  };
 
   const handleStake = async (isStake: Boolean, value: string) => {
     console.log(isStake, "isStake");
@@ -138,23 +170,30 @@ const StakeModal: React.FC<ModalProps> = ({
         </div>
         {isStake && (
           <div className="m-6">
-            <div>Lock Period :</div>
-            <div>
+            <div className="flex justify-between mb-3">
+              <div className="font-bold"> Multiplier: </div>
+              <div>
+                {multiplier}
+              </div>
+            </div>
+            <div className="font-bold">Lock Period :</div>
+            <div className="flex justify-between">
               <input
                 type="number"
                 value={duration}
                 min={1}
                 max={52}
                 onChange={handleDuration}
-                className="border-4 py-1 w-full rounded-md border-solid border-gray-400 bg-gray-200 mt-2 focus:outline-none text-right px-2 font-semibold"
-              />
+                className="border-4 py-1 w-[calc(100%-60px)] rounded-md border-solid border-gray-400 bg-gray-200 mt-2 focus:outline-none text-right px-2 font-semibold"
+                />
+                <div className="align-bottom mt-4 text-gray-600 font-semibold">Weeks</div>
             </div>
             <div className="grid grid-cols-5 gap-2 mt-2">
               {durations.map((item, key) => (
                 <button
-                  className="border rounded-md text-sm font-bold  grid place-content-center py-1 hover:bg-[#777] focus:bg-slate-500"
-                  key={key}
-                  onClick={() => setDuration(item.value)}
+                className="border rounded-md text-sm font-bold  grid place-content-center py-1 hover:bg-[#777] focus:bg-slate-500"
+                key={key}
+                onClick={() => handleSetDuration(item.value)}
                 >
                   {item.title}
                 </button>
@@ -174,7 +213,7 @@ const StakeModal: React.FC<ModalProps> = ({
                 }
                 disabled
               >
-                {isStake ? `Stake` : `Unstake`}
+                Stake
               </button>
             ) : (
               <button
@@ -185,7 +224,7 @@ const StakeModal: React.FC<ModalProps> = ({
                     : () => handleStake(false, inputValue)
                 }
               >
-                {isStake ? `Stake` : `Unstake`}
+                Stake
               </button>
             )}
             {loading && <LoadingModal />}

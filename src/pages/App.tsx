@@ -12,8 +12,8 @@ import StakeInfo from "../components/StakeInfo";
 
 function App() {
   const { isConnected, address } = useAccount();
-  const { userInfo, pending, currentStakedId, earnedDrip } = useStaking();
-  const { balanceOf } = useErc20();
+  const { userInfo, pending, currentStakedId, earnedDrip, userStakedAmount, maxLockDuration } = useStaking();
+  const { balanceOf, totalSupply } = useErc20();
   const [isStake, setIsStake] = useState(false);
   const [isStakeModalOpen, setIsStakeModalOpen] = useState(false);
 
@@ -21,6 +21,9 @@ function App() {
   const [stakedAmount, setStakedAmount] = useState(0);
   const [price, setPrice] = useState(0);
   const [earnedAmt, setEarnedAmt] = useState(0);
+  const [lpSupply, setLpSupply] = useState(0);
+  const [userTotalStake, setUserTotalStake] = useState(0);
+  const [maxDuration, setMaxDuration] = useState(0);
 
   const [userStakeAmount, setUserStakeAmount] = useState<number[]>([]);
   const [pendingDrip, setPendingDrip] = useState<number[]>([]);
@@ -73,6 +76,9 @@ function App() {
       const infoBal = await balanceOf(address);
       const infoTotal = await balanceOf(STAKING_CONTRACT_ADDRESS);
       const earnedInfo = await earnedDrip(address);
+      const totalStakeInfo = await userStakedAmount(address);
+      const supplyInfo = await totalSupply();
+      const durationInfo = await maxLockDuration();
 
       for (let i = 0; i < Number(staked); i++) {
         stakedItems.push(i);
@@ -106,6 +112,18 @@ function App() {
         // @ts-ignore
         setEarnedAmt(Number(formatEther(earnedInfo)));
       }
+      if (supplyInfo) {
+        // @ts-ignore
+        setLpSupply(Number(formatEther(supplyInfo)));
+      }
+      if (totalStakeInfo) {
+        // @ts-ignore
+        setUserTotalStake(Number(formatEther(totalStakeInfo)));
+      }
+      if (durationInfo) {
+        // @ts-ignore
+        setMaxDuration(Number(durationInfo));
+      }
 
       setPendingDrip(pendingDrips);
       setUserStakeAmount(userStakeAmounts);
@@ -135,6 +153,10 @@ function App() {
       <StakeModal
         isOpen={isStakeModalOpen}
         isStake={isStake}
+        lpSupply={lpSupply}
+        userTotalStake={userTotalStake}
+        maxDuration={maxDuration}
+        stakedAmount={stakedAmount}
         onClose={closeStakeModal}
         userStakeAmt={userStakeAmount[0]}
         userLpBal={userLpBalance}

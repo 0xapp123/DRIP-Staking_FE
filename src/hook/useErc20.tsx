@@ -25,8 +25,17 @@ export function useErc20() {
     })
   };
 
+  const totalSupply = async () => {
+    return await read({
+      address: LP_TOKEN_ADDRESS,
+      abi: LP_TOKEN_ABI as Abi,
+      functionName: 'totalSupply',
+    })
+  };
+
   return {
     approve,
     balanceOf,
+    totalSupply
   };
 }
