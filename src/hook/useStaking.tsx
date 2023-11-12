@@ -90,6 +90,14 @@ export function useStaking() {
     })
   };
 
+  const accPerShare = async () => {
+    return await read({
+      address: STAKING_CONTRACT_ADDRESS,
+      abi: STAKING_CONTRACT_ABI,
+      functionName: 'accDripPerShare',
+    })
+  };
+
   return {
     stake,
     claim,
@@ -99,6 +107,7 @@ export function useStaking() {
     earnedDrip,
     currentStakedId,
     userStakedAmount,
-    maxLockDuration
+    maxLockDuration,
+    accPerShare
   };
 }
