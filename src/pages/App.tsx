@@ -12,7 +12,15 @@ import StakeInfo from "../components/StakeInfo";
 
 function App() {
   const { isConnected, address } = useAccount();
-  const { userInfo, pending, currentStakedId, earnedDrip, userStakedAmount, maxLockDuration } = useStaking();
+  const {
+    userInfo,
+    pending,
+    currentStakedId,
+    earnedDrip,
+    userStakedAmount,
+    maxLockDuration,
+    accPerShare
+  } = useStaking();
   const { balanceOf, totalSupply } = useErc20();
   const [isStake, setIsStake] = useState(false);
   const [isStakeModalOpen, setIsStakeModalOpen] = useState(false);
@@ -20,10 +28,13 @@ function App() {
   const [userLpBalance, setUserLpBalance] = useState(0);
   const [stakedAmount, setStakedAmount] = useState(0);
   const [price, setPrice] = useState(0);
+  const [bnbPrice, setBnbPrice] = useState(0);
+  const [multiplier, setMultiplier] = useState(0);
   const [earnedAmt, setEarnedAmt] = useState(0);
   const [lpSupply, setLpSupply] = useState(0);
   const [userTotalStake, setUserTotalStake] = useState(0);
   const [maxDuration, setMaxDuration] = useState(0);
+  const [accumulator, setAccumulator] = useState(1);
 
   const [userStakeAmount, setUserStakeAmount] = useState<number[]>([]);
   const [pendingDrip, setPendingDrip] = useState<number[]>([]);
@@ -41,6 +52,8 @@ function App() {
 
   const getPrice = () => {
     let interval = setInterval(() => {
+      let dripPrice: number = 0;
+      let cBnbPrice: number = 0; 
       fetch(
         "https://api.coingecko.com/api/v3/simple/price?ids=drip-network&vs_currencies=usd"
       )
@@ -58,6 +71,28 @@ function App() {
         .catch((e) => {
           console.log(e);
         });
+      fetch(
+        "https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd"
+      )
+        .then((resp) => {
+          if (!resp.ok) {
+            throw new Error(`HTTP error! Status: ${resp.status}`);
+          }
+          return resp.json();
+        })
+        .then((json) => {
+          // @ts-ignore
+          console.log("========BNB Price========", json["binancecoin"].usd);
+          setBnbPrice(json["binancecoin"].usd);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+
+        if (bnbPrice + price != 0) {
+          console.log("+++++++++++", price/(bnbPrice + price));
+          setMultiplier(price/(bnbPrice + price));
+        }
       getUserInfo();
     }, 7000);
     return interval;
@@ -79,6 +114,7 @@ function App() {
       const totalStakeInfo = await userStakedAmount(address);
       const supplyInfo = await totalSupply();
       const durationInfo = await maxLockDuration();
+      const accInfo = await accPerShare();
 
       for (let i = 0; i < Number(staked); i++) {
         stakedItems.push(i);
@@ -97,7 +133,7 @@ function App() {
         }
         if (pendingInfos) {
           // @ts-ignore
-          pendingDrips.push(Number(formatEther(pendingInfos)))
+          pendingDrips.push(Number(formatEther(pendingInfos)));
         }
       }
       if (infoTotal) {
@@ -124,10 +160,14 @@ function App() {
         // @ts-ignore
         setMaxDuration(Number(durationInfo));
       }
+      if (accInfo) {
+        // @ts-ignore
+        setAccumulator(Number(formatEther(accInfo)));
+      }
 
       setPendingDrip(pendingDrips);
       setUserStakeAmount(userStakeAmounts);
-      setEndTime(endTimes)
+      setEndTime(endTimes);
       setTimes(stakedItems);
     }
   };
@@ -137,7 +177,6 @@ function App() {
     if (isConnected && address) {
       getUserInfo();
     }
-   
   }, [isConnected, address]);
 
   useEffect(() => {
@@ -157,6 +196,8 @@ function App() {
         userTotalStake={userTotalStake}
         maxDuration={maxDuration}
         stakedAmount={stakedAmount}
+        mult={multiplier}
+        accPerShare={accumulator}
         onClose={closeStakeModal}
         userStakeAmt={userStakeAmount[0]}
         userLpBal={userLpBalance}
@@ -263,12 +304,13 @@ function App() {
               <div className="w-[calc(100%-240px)] ml-10 flex flex-col">
                 <div className="max-h-screen w-full overflow-y-scroll">
                   {times.map((item) => (
-                    <StakeInfo 
+                    <StakeInfo
                       pendingDrip={pendingDrip[item]}
                       price={price}
                       userStakeAmount={userStakeAmount[item]}
                       stakeId={item}
-                      endTime={endTime[item]} />
+                      endTime={endTime[item]}
+                    />
                   ))}
                 </div>
               </div>

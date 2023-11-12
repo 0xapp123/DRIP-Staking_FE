@@ -14,8 +14,10 @@ interface ModalProps {
   userLpBal: number;
   endTime: number;
   lpSupply: number;
-  userTotalStake: number; 
-  maxDuration: number;  
+  mult: number;
+  accPerShare: number;
+  userTotalStake: number;
+  maxDuration: number;
   stakedAmount: number;
   onClose: () => void;
   children: ReactNode;
@@ -28,6 +30,8 @@ const StakeModal: React.FC<ModalProps> = ({
   userLpBal,
   endTime,
   lpSupply,
+  mult,
+  accPerShare,
   userTotalStake,
   maxDuration,
   stakedAmount,
@@ -36,6 +40,7 @@ const StakeModal: React.FC<ModalProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState("");
   const [multiplier, setMultiplier] = useState(1);
+  const [apr, setApr] = useState(0);
   const { approve } = useErc20();
   const { withdraw, stake } = useStaking();
   const [loading, setLoading] = useState(false);
@@ -43,16 +48,35 @@ const StakeModal: React.FC<ModalProps> = ({
 
   const handleDuration = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value as unknown as number;
-    if (userTotalStake === 0 || maxDuration === 0 || lpSupply === 0  || stakedAmount === 0) setMultiplier(1);
+    if (
+      userTotalStake === 0 ||
+      maxDuration === 0 ||
+      lpSupply === 0 ||
+      stakedAmount === 0
+    )
+      setMultiplier(1);
     if (MAX_WEEKS < value) {
       console.log("inpiut", Number(inputValue));
       console.log("userTotalStake", userTotalStake);
 
-      const boostMul = 1 + Number(inputValue) * MAX_WEEKS * 7 * 86400 * userTotalStake /(lpSupply * maxDuration * stakedAmount);
+      const boostMul =
+        1 +
+        (Number(inputValue) * MAX_WEEKS * 7 * 86400 * userTotalStake) /
+          (lpSupply * maxDuration * stakedAmount);
+      const apr =
+        ((boostMul * accPerShare * 86400 * 365 * Number(inputValue)) /
+          stakedAmount) *
+        mult *
+        100;
+
+      setApr(apr);
       setMultiplier(boostMul);
       setDuration(MAX_WEEKS);
     } else {
-      const boostMul = 1 + Number(inputValue) * value * 7 * 86400 * userTotalStake /(lpSupply * maxDuration * stakedAmount);
+      const boostMul =
+        1 +
+        (Number(inputValue) * value * 7 * 86400 * userTotalStake) /
+          (lpSupply * maxDuration * stakedAmount);
       setMultiplier(boostMul);
       setDuration(value);
     }
@@ -65,22 +89,53 @@ const StakeModal: React.FC<ModalProps> = ({
       let max = 0;
       if (input === 0) max = userStakeAmt;
       if (input === 1) max = userLpBal;
-      console.log(max);
+      console.log("Max: ", max);
 
       if (Number(event.target.value) > max) console.log("Exceed Amount");
       else if (isNaN(Number(event.target.value))) setInputValue("0");
       else {
-        if (userTotalStake === 0 || maxDuration === 0 || lpSupply === 0  || stakedAmount === 0) setMultiplier(1);
+        let multi = 1;
+        if (
+          userTotalStake === 0 ||
+          maxDuration === 0 ||
+          lpSupply === 0 ||
+          stakedAmount === 0
+        )
+          multi = 1;
         else {
-          const boostMul = 1 + Number(event.target.value) * 7 * duration * 86400 * userTotalStake /(lpSupply * maxDuration * stakedAmount);
-          setMultiplier(boostMul);
+          multi =
+            1 +
+            (Number(event.target.value) *
+              7 *
+              duration *
+              86400 *
+              userTotalStake) /
+              (lpSupply * maxDuration * stakedAmount);
         }
+        const apr =
+          ((multi * accPerShare * 86400 * 365 * Number(inputValue)) /
+            stakedAmount) *
+          mult *
+          100;
+
+        setApr(apr);
+        setMultiplier(multi);
         setInputValue(event.target.value);
       }
     };
 
   const handleSetDuration = (value: number) => {
-    const boostMul = 1 + Number(inputValue) * value * 7 * 86400 * userTotalStake /(lpSupply * maxDuration * stakedAmount);
+    const boostMul =
+      1 +
+      (Number(inputValue) * value * 7 * 86400 * userTotalStake) /
+        (lpSupply * maxDuration * stakedAmount);
+    const apr =
+      ((boostMul * accPerShare * 86400 * 365 * Number(inputValue)) /
+        stakedAmount) *
+      mult *
+      100;
+
+    setApr(apr);
     setMultiplier(boostMul);
     setDuration(value);
   };
@@ -141,14 +196,14 @@ const StakeModal: React.FC<ModalProps> = ({
             </div>
             <div className="font-bold">DRIP-BNB LP</div>
           </div>
-          {!isStake &&
-            (<div className="flex justify-between py-2 font-semibold">
+          {!isStake && (
+            <div className="flex justify-between py-2 font-semibold">
               <span>End in: </span>
               <span>{endTime} days</span>
-            </div>)
-          }
+            </div>
+          )}
         </div>
-        <div className=" border-solid border-4 border-gray-400 bg-gray-200 rounded-[12px] m-6 p-4">
+        <div className=" border-solid border-4 border-gray-400 bg-gray-200 rounded-[12px] mx-6 p-4">
           <input
             className="w-full bg-transparent text-right focus:outline-none text-xl"
             type="text"
@@ -170,12 +225,6 @@ const StakeModal: React.FC<ModalProps> = ({
         </div>
         {isStake && (
           <div className="m-6">
-            <div className="flex justify-between mb-3">
-              <div className="font-bold"> Multiplier: </div>
-              <div>
-                {multiplier}
-              </div>
-            </div>
             <div className="font-bold">Lock Period :</div>
             <div className="flex justify-between">
               <input
@@ -185,19 +234,35 @@ const StakeModal: React.FC<ModalProps> = ({
                 max={52}
                 onChange={handleDuration}
                 className="border-4 py-1 w-[calc(100%-60px)] rounded-md border-solid border-gray-400 bg-gray-200 mt-2 focus:outline-none text-right px-2 font-semibold"
-                />
-                <div className="align-bottom mt-4 text-gray-600 font-semibold">Weeks</div>
+              />
+              <div className="align-bottom mt-4 text-gray-600 font-semibold">
+                Weeks
+              </div>
             </div>
             <div className="grid grid-cols-5 gap-2 mt-2">
               {durations.map((item, key) => (
                 <button
-                className="border rounded-md text-sm font-bold  grid place-content-center py-1 hover:bg-[#777] focus:bg-slate-500"
-                key={key}
-                onClick={() => handleSetDuration(item.value)}
+                  className="border rounded-md text-sm font-bold  grid place-content-center py-1 hover:bg-[#777] focus:bg-slate-500"
+                  key={key}
+                  onClick={() => handleSetDuration(item.value)}
                 >
                   {item.title}
                 </button>
               ))}
+            </div>
+            <div className=" border-solid border-4 border-gray-400 bg-gray-200 rounded-[12px] mt-6 p-3">
+              <div className="flex justify-between mb-1">
+                <div className="font-bold"> Multiplier: </div>
+                <div>{multiplier.toFixed(3)}</div>
+              </div>
+              <div className="flex justify-between mb-1">
+                <div className="font-bold"> Lock Duration: </div>
+                <div>{duration}</div>
+              </div>
+              <div className="flex justify-between">
+                <div className="font-bold"> APR: </div>
+                <div>{apr.toFixed(2)} %</div>
+              </div>
             </div>
           </div>
         )}
