@@ -52,8 +52,6 @@ function App() {
 
   const getPrice = () => {
     let interval = setInterval(() => {
-      let dripPrice: number = 0;
-      let cBnbPrice: number = 0; 
       fetch(
         "https://api.coingecko.com/api/v3/simple/price?ids=drip-network&vs_currencies=usd"
       )
