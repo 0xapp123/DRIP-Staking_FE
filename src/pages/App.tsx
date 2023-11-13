@@ -29,7 +29,6 @@ function App() {
   const [stakedAmount, setStakedAmount] = useState(0);
   const [price, setPrice] = useState(0);
   const [bnbPrice, setBnbPrice] = useState(0);
-  const [multiplier, setMultiplier] = useState(0);
   const [earnedAmt, setEarnedAmt] = useState(0);
   const [lpSupply, setLpSupply] = useState(0);
   const [userTotalStake, setUserTotalStake] = useState(0);
@@ -87,10 +86,7 @@ function App() {
           console.log(e);
         });
 
-        if (bnbPrice + price != 0) {
-          console.log("+++++++++++", price/(bnbPrice + price));
-          setMultiplier(price/(bnbPrice + price));
-        }
+        
       getUserInfo();
     }, 7000);
     return interval;
@@ -194,7 +190,8 @@ function App() {
         userTotalStake={userTotalStake}
         maxDuration={maxDuration}
         stakedAmount={stakedAmount}
-        mult={multiplier}
+        cdripPrice={price}
+        cbnbPrice={bnbPrice}
         accPerShare={accumulator}
         onClose={closeStakeModal}
         userStakeAmt={userStakeAmount[0]}
