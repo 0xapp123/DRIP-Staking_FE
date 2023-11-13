@@ -14,7 +14,8 @@ interface ModalProps {
   userLpBal: number;
   endTime: number;
   lpSupply: number;
-  mult: number;
+  cdripPrice: number;
+  cbnbPrice: number;
   accPerShare: number;
   userTotalStake: number;
   maxDuration: number;
@@ -30,7 +31,8 @@ const StakeModal: React.FC<ModalProps> = ({
   userLpBal,
   endTime,
   lpSupply,
-  mult,
+  cdripPrice,
+  cbnbPrice,
   accPerShare,
   userTotalStake,
   maxDuration,
@@ -66,7 +68,7 @@ const StakeModal: React.FC<ModalProps> = ({
       const apr =
         ((boostMul * accPerShare * 86400 * 365 * Number(inputValue)) /
           stakedAmount) *
-        mult *
+        cdripPrice / (cdripPrice + cbnbPrice) *
         100;
 
       setApr(apr);
@@ -94,6 +96,7 @@ const StakeModal: React.FC<ModalProps> = ({
       if (Number(event.target.value) > max) console.log("Exceed Amount");
       else if (isNaN(Number(event.target.value))) setInputValue("0");
       else {
+        console.log("Stake Amount Input Value: ", event.target.value)
         let multi = 1;
         if (
           userTotalStake === 0 ||
@@ -115,7 +118,7 @@ const StakeModal: React.FC<ModalProps> = ({
         const apr =
           ((multi * accPerShare * 86400 * 365 * Number(inputValue)) /
             stakedAmount) *
-          mult *
+          cdripPrice / (cdripPrice + cbnbPrice) *
           100;
 
         setApr(apr);
@@ -132,7 +135,7 @@ const StakeModal: React.FC<ModalProps> = ({
     const apr =
       ((boostMul * accPerShare * 86400 * 365 * Number(inputValue)) /
         stakedAmount) *
-      mult *
+      cdripPrice / (cdripPrice + cbnbPrice) *
       100;
 
     setApr(apr);
