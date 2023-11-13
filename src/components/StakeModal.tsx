@@ -115,8 +115,9 @@ const StakeModal: React.FC<ModalProps> = ({
               userTotalStake) /
               (lpSupply * maxDuration * stakedAmount);
         }
+        
         const apr =
-          ((multi * accPerShare * 86400 * 365 * Number(inputValue)) /
+          ((multi * accPerShare * 86400 * 365 * Number(event.target.value)) /
             stakedAmount) *
           cdripPrice / (cdripPrice + cbnbPrice) *
           100;
