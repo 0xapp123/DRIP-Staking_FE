@@ -1,5 +1,5 @@
 export const STAKING_CONTRACT_ADDRESS: `0x${string}` =
-  "0x120473618277e0C0040B182E392f8217A55F8ba2";
+  "0xcFB361d5b3492582d70754EDf4CCCF3B988a735E";
 export const LP_TOKEN_ADDRESS: `0x${string}` =
   "0x16567F9Cc0cb4858bcC729285fC836006eE9c81b";
 export const STAKING_CONTRACT_ABI: any[] = [
@@ -112,8 +112,22 @@ export const STAKING_CONTRACT_ABI: any[] = [
   },
   {
     inputs: [],
+    name: "BOOST_WEIGHT",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "DRIP",
     outputs: [{ internalType: "contract IBEP20", name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "DURATION_FACTOR",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
@@ -176,11 +190,7 @@ export const STAKING_CONTRACT_ABI: any[] = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "address", name: "_user", type: "address" },
-      { internalType: "uint256", name: "_duration", type: "uint256" },
-      { internalType: "uint256", name: "_amount", type: "uint256" },
-    ],
+    inputs: [{ internalType: "uint256", name: "_duration", type: "uint256" }],
     name: "getBoostMultiplier",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
@@ -241,6 +251,15 @@ export const STAKING_CONTRACT_ABI: any[] = [
   {
     inputs: [],
     name: "renounceOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "uint256", name: "_boostWeight", type: "uint256" },
+    ],
+    name: "setBoostWeight",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

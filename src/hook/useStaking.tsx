@@ -90,11 +90,11 @@ export function useStaking() {
     })
   };
 
-  const accPerShare = async () => {
+  const boostWeight = async () => {
     return await read({
       address: STAKING_CONTRACT_ADDRESS,
       abi: STAKING_CONTRACT_ABI,
-      functionName: 'accDripPerShare',
+      functionName: 'BOOST_WEIGHT',
     })
   };
 
@@ -108,6 +108,6 @@ export function useStaking() {
     currentStakedId,
     userStakedAmount,
     maxLockDuration,
-    accPerShare
+    boostWeight
   };
 }

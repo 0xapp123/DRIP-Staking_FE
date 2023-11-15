@@ -122,7 +122,7 @@ const StakeInfo: React.FC<ModalProps> = ({
         </div>
         <div className="p-8">
           <div className="text-lg font-bold">Harvesting:</div>
-          <div className="text-[20px] mt-4 font-bold">{pendingDrip} DRIP</div>
+          <div className="text-[20px] mt-4 font-bold">{pendingDrip.toFixed(3)} DRIP</div>
           <div className="text-gray-400 font-bold">
             ~{(pendingDrip * price).toFixed(4)} USD
           </div>

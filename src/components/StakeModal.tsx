@@ -1,5 +1,5 @@
 // Modal.tsx
-import React, { ChangeEvent, ReactNode, useState } from "react";
+import React, { ChangeEvent, ReactNode, useEffect, useState } from "react";
 import { useErc20 } from "../hook/useErc20";
 import { useStaking } from "../hook/useStaking";
 import { parseEther } from "viem";
@@ -12,13 +12,7 @@ interface ModalProps {
   isStake: boolean;
   userStakeAmt: number;
   userLpBal: number;
-  endTime: number;
-  lpSupply: number;
-  cdripPrice: number;
-  cbnbPrice: number;
-  accPerShare: number;
-  userTotalStake: number;
-  maxDuration: number;
+  weight: number;
   stakedAmount: number;
   onClose: () => void;
   children: ReactNode;
@@ -29,13 +23,7 @@ const StakeModal: React.FC<ModalProps> = ({
   isStake,
   userStakeAmt,
   userLpBal,
-  endTime,
-  lpSupply,
-  cdripPrice,
-  cbnbPrice,
-  accPerShare,
-  userTotalStake,
-  maxDuration,
+  weight,
   stakedAmount,
   onClose,
   children,
@@ -47,38 +35,33 @@ const StakeModal: React.FC<ModalProps> = ({
   const { withdraw, stake } = useStaking();
   const [loading, setLoading] = useState(false);
   const [duration, setDuration] = useState(1);
+  
+  useEffect(() => {
+    const boostMul = 1 + (1 * 7 * 86400) * weight / (365 * 86400);
+    const cApr = 5 / (1 + weight) * boostMul;
+  
+    setApr(cApr);
+    setMultiplier(boostMul);
+  }, []);
 
   const handleDuration = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value as unknown as number;
     if (
-      userTotalStake === 0 ||
-      maxDuration === 0 ||
-      lpSupply === 0 ||
       stakedAmount === 0
     )
       setMultiplier(1);
     if (MAX_WEEKS < value) {
-      console.log("inpiut", Number(inputValue));
-      console.log("userTotalStake", userTotalStake);
+      console.log("input", Number(inputValue));
 
-      const boostMul =
-        1 +
-        (Number(inputValue) * MAX_WEEKS * 7 * 86400 * userTotalStake) /
-          (lpSupply * maxDuration * stakedAmount);
-      const apr =
-        ((boostMul * accPerShare * 86400 * 365 * Number(inputValue)) /
-          stakedAmount) *
-        cdripPrice / (cdripPrice + cbnbPrice) *
-        100;
+      const boostMul = 1 + (MAX_WEEKS * 7 * 86400) * weight / (365 * 86400);
+      const apr = 5 / (1 + weight) * boostMul;
 
       setApr(apr);
       setMultiplier(boostMul);
       setDuration(MAX_WEEKS);
     } else {
-      const boostMul =
-        1 +
-        (Number(inputValue) * value * 7 * 86400 * userTotalStake) /
-          (lpSupply * maxDuration * stakedAmount);
+      const boostMul = 1 + (value * 7 * 86400) * weight / (365 * 86400);
+
       setMultiplier(boostMul);
       setDuration(value);
     }
@@ -97,47 +80,13 @@ const StakeModal: React.FC<ModalProps> = ({
       else if (isNaN(Number(event.target.value))) setInputValue("0");
       else {
         console.log("Stake Amount Input Value: ", event.target.value)
-        let multi = 1;
-        if (
-          userTotalStake === 0 ||
-          maxDuration === 0 ||
-          lpSupply === 0 ||
-          stakedAmount === 0
-        )
-          multi = 1;
-        else {
-          multi =
-            1 +
-            (Number(event.target.value) *
-              7 *
-              duration *
-              86400 *
-              userTotalStake) /
-              (lpSupply * maxDuration * stakedAmount);
-        }
-        
-        const apr =
-          ((multi * accPerShare * 86400 * 365 * Number(event.target.value)) /
-            stakedAmount) *
-          cdripPrice / (cdripPrice + cbnbPrice) *
-          100;
-
-        setApr(apr);
-        setMultiplier(multi);
         setInputValue(event.target.value);
       }
     };
 
   const handleSetDuration = (value: number) => {
-    const boostMul =
-      1 +
-      (Number(inputValue) * value * 7 * 86400 * userTotalStake) /
-        (lpSupply * maxDuration * stakedAmount);
-    const apr =
-      ((boostMul * accPerShare * 86400 * 365 * Number(inputValue)) /
-        stakedAmount) *
-      cdripPrice / (cdripPrice + cbnbPrice) *
-      100;
+    const boostMul = 1 + (value * 7 * 86400) * weight / (365 * 86400);
+    const apr = 5 / (1 + weight) * boostMul;
 
     setApr(apr);
     setMultiplier(boostMul);
@@ -200,12 +149,6 @@ const StakeModal: React.FC<ModalProps> = ({
             </div>
             <div className="font-bold">DRIP-BNB LP</div>
           </div>
-          {!isStake && (
-            <div className="flex justify-between py-2 font-semibold">
-              <span>End in: </span>
-              <span>{endTime} days</span>
-            </div>
-          )}
         </div>
         <div className=" border-solid border-4 border-gray-400 bg-gray-200 rounded-[12px] mx-6 p-4">
           <input
@@ -272,7 +215,7 @@ const StakeModal: React.FC<ModalProps> = ({
         )}
         <div>
           <div className="flex justify-center">
-            {endTime > 0 && !isStake ? (
+            {!isStake ? (
               <button
                 className=" mt-4 p-2 w-2/3 bg-gray-500 font-bold text-white rounded-[8px]"
                 onClick={
