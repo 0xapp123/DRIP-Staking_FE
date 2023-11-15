@@ -18,7 +18,6 @@ function App() {
     currentStakedId,
     earnedDrip,
     userStakedAmount,
-    maxLockDuration,
     boostWeight
   } = useStaking();
   const { balanceOf, totalSupply } = useErc20();
@@ -29,8 +28,6 @@ function App() {
   const [stakedAmount, setStakedAmount] = useState(0);
   const [price, setPrice] = useState(0);
   const [earnedAmt, setEarnedAmt] = useState(0);
-  const [lpSupply, setLpSupply] = useState(0);
-  const [userTotalStake, setUserTotalStake] = useState(0);
   const [weight, setWeight] = useState(0);
 
   const [userStakeAmount, setUserStakeAmount] = useState<number[]>([]);
@@ -87,7 +84,6 @@ function App() {
       const earnedInfo = await earnedDrip(address);
       const totalStakeInfo = await userStakedAmount(address);
       const supplyInfo = await totalSupply();
-      const durationInfo = await maxLockDuration();
       const weightInfo = await boostWeight();
 
       for (let i = 0; i < Number(staked); i++) {
