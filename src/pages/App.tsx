@@ -18,8 +18,7 @@ function App() {
     currentStakedId,
     earnedDrip,
     userStakedAmount,
-    maxLockDuration,
-    accPerShare
+    boostWeight
   } = useStaking();
   const { balanceOf, totalSupply } = useErc20();
   const [isStake, setIsStake] = useState(false);
@@ -28,12 +27,8 @@ function App() {
   const [userLpBalance, setUserLpBalance] = useState(0);
   const [stakedAmount, setStakedAmount] = useState(0);
   const [price, setPrice] = useState(0);
-  const [bnbPrice, setBnbPrice] = useState(0);
   const [earnedAmt, setEarnedAmt] = useState(0);
-  const [lpSupply, setLpSupply] = useState(0);
-  const [userTotalStake, setUserTotalStake] = useState(0);
-  const [maxDuration, setMaxDuration] = useState(0);
-  const [accumulator, setAccumulator] = useState(1);
+  const [weight, setWeight] = useState(0);
 
   const [userStakeAmount, setUserStakeAmount] = useState<number[]>([]);
   const [pendingDrip, setPendingDrip] = useState<number[]>([]);
@@ -68,24 +63,6 @@ function App() {
         .catch((e) => {
           console.log(e);
         });
-      fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd"
-      )
-        .then((resp) => {
-          if (!resp.ok) {
-            throw new Error(`HTTP error! Status: ${resp.status}`);
-          }
-          return resp.json();
-        })
-        .then((json) => {
-          // @ts-ignore
-          console.log("========BNB Price========", json["binancecoin"].usd);
-          setBnbPrice(json["binancecoin"].usd);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-
         
       getUserInfo();
     }, 7000);
@@ -107,8 +84,7 @@ function App() {
       const earnedInfo = await earnedDrip(address);
       const totalStakeInfo = await userStakedAmount(address);
       const supplyInfo = await totalSupply();
-      const durationInfo = await maxLockDuration();
-      const accInfo = await accPerShare();
+      const weightInfo = await boostWeight();
 
       for (let i = 0; i < Number(staked); i++) {
         stakedItems.push(i);
@@ -150,13 +126,9 @@ function App() {
         // @ts-ignore
         setUserTotalStake(Number(formatEther(totalStakeInfo)));
       }
-      if (durationInfo) {
+      if (weightInfo) {
         // @ts-ignore
-        setMaxDuration(Number(durationInfo));
-      }
-      if (accInfo) {
-        // @ts-ignore
-        setAccumulator(Number(formatEther(accInfo)));
+        setWeight(Number(formatEther(weightInfo, "gwei")) / 1000);
       }
 
       setPendingDrip(pendingDrips);
@@ -186,17 +158,11 @@ function App() {
       <StakeModal
         isOpen={isStakeModalOpen}
         isStake={isStake}
-        lpSupply={lpSupply}
-        userTotalStake={userTotalStake}
-        maxDuration={maxDuration}
+        weight={weight}
         stakedAmount={stakedAmount}
-        cdripPrice={price}
-        cbnbPrice={bnbPrice}
-        accPerShare={accumulator}
         onClose={closeStakeModal}
         userStakeAmt={userStakeAmount[0]}
         userLpBal={userLpBalance}
-        endTime={endTime[0]}
       >
         <div className="flex justify-between bg-gray-200 rounded-t-[32px] p-6">
           <div className="flex font-bold text-[20px]">
