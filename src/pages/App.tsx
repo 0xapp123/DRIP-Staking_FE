@@ -17,10 +17,9 @@ function App() {
     pending,
     currentStakedId,
     earnedDrip,
-    userStakedAmount,
     boostWeight
   } = useStaking();
-  const { balanceOf, totalSupply } = useErc20();
+  const { balanceOf } = useErc20();
   const [isStake, setIsStake] = useState(false);
   const [isStakeModalOpen, setIsStakeModalOpen] = useState(false);
 
