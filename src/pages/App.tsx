@@ -17,10 +17,9 @@ function App() {
     pending,
     currentStakedId,
     earnedDrip,
-    userStakedAmount,
     boostWeight
   } = useStaking();
-  const { balanceOf, totalSupply } = useErc20();
+  const { balanceOf } = useErc20();
   const [isStake, setIsStake] = useState(false);
   const [isStakeModalOpen, setIsStakeModalOpen] = useState(false);
 
@@ -82,8 +81,6 @@ function App() {
       const infoBal = await balanceOf(address);
       const infoTotal = await balanceOf(STAKING_CONTRACT_ADDRESS);
       const earnedInfo = await earnedDrip(address);
-      const totalStakeInfo = await userStakedAmount(address);
-      const supplyInfo = await totalSupply();
       const weightInfo = await boostWeight();
 
       for (let i = 0; i < Number(staked); i++) {
@@ -118,14 +115,7 @@ function App() {
         // @ts-ignore
         setEarnedAmt(Number(formatEther(earnedInfo)));
       }
-      if (supplyInfo) {
-        // @ts-ignore
-        setLpSupply(Number(formatEther(supplyInfo)));
-      }
-      if (totalStakeInfo) {
-        // @ts-ignore
-        setUserTotalStake(Number(formatEther(totalStakeInfo)));
-      }
+      
       if (weightInfo) {
         // @ts-ignore
         setWeight(Number(formatEther(weightInfo, "gwei")) / 1000);
